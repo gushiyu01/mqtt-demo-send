@@ -1,6 +1,7 @@
-package com.example.mqtt.mqttdemosend.config;
+package com.example.mqtt.config.mqtt;
 
 
+import com.example.mqtt.config.websocket.WebSocketServer;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +21,9 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 
+import java.io.IOException;
+import java.util.logging.Logger;
+
 /**
  * @Author: Create by gsy
  * @Date: Create in 2020/5/26 16:03
@@ -28,6 +32,9 @@ import org.springframework.messaging.MessagingException;
 @Configuration
 @IntegrationComponentScan
 public class MqttSenderConfig {
+
+    Logger logger = Logger.getLogger ("MqttSenderConfig");
+
     @Value("${spring.mqtt.username}")
     private String username;
 
@@ -47,38 +54,39 @@ public class MqttSenderConfig {
     private int completionTimeout;
 
     @Bean
-    public MqttConnectOptions getMqttConnectOptions(){
-        MqttConnectOptions mqttConnectOptions=new MqttConnectOptions();
-        mqttConnectOptions.setUserName(username);
-        mqttConnectOptions.setPassword(password.toCharArray());
-        mqttConnectOptions.setServerURIs(new String[]{hostUrl});
-        mqttConnectOptions.setKeepAliveInterval(2);
+    public MqttConnectOptions getMqttConnectOptions() {
+        MqttConnectOptions mqttConnectOptions = new MqttConnectOptions ( );
+        mqttConnectOptions.setUserName (username);
+        mqttConnectOptions.setPassword (password.toCharArray ( ));
+        mqttConnectOptions.setServerURIs (new String[]{hostUrl});
+        mqttConnectOptions.setKeepAliveInterval (2);
         return mqttConnectOptions;
     }
 
     @Bean
     public MqttPahoClientFactory mqttClientFactory() throws MqttException {
-        DefaultMqttPahoClientFactory factory = new DefaultMqttPahoClientFactory();
-        factory.setConnectionOptions(getMqttConnectOptions());
+        DefaultMqttPahoClientFactory factory = new DefaultMqttPahoClientFactory ( );
+        factory.setConnectionOptions (getMqttConnectOptions ( ));
 //        factory.getClientInstance ("tcp://47.104.168.202:1883","mqttId").setCallback (new MqttPushCallback());
         return factory;
     }
 
     /**
      * 发送通道
+     *
      * @return
      */
     @Bean
     public MessageChannel mqttOutboundChannel() {
-        return new DirectChannel ();
+        return new DirectChannel ( );
     }
 
     @Bean
     @ServiceActivator(inputChannel = "mqttOutboundChannel")
     public MessageHandler mqttOutbound() throws MqttException {
-        MqttPahoMessageHandler messageHandler =  new MqttPahoMessageHandler(clientId, mqttClientFactory());
-        messageHandler.setAsync(true);
-        messageHandler.setDefaultTopic(defaultTopic);
+        MqttPahoMessageHandler messageHandler = new MqttPahoMessageHandler (clientId, mqttClientFactory ( ));
+        messageHandler.setAsync (true);
+        messageHandler.setDefaultTopic (defaultTopic);
         return messageHandler;
     }
 
@@ -87,44 +95,52 @@ public class MqttSenderConfig {
      */
     @Bean
     public MessageChannel mqttInputChannel() {
-        return new DirectChannel ();
+        return new DirectChannel ( );
     }
 
     /**
      * 配置client,监听的topic
+     *
      * @return
      */
     @Bean
     public MessageProducer inbound() throws MqttException {
         MqttPahoMessageDrivenChannelAdapter adapter =
-                new MqttPahoMessageDrivenChannelAdapter(clientId+"_inbound", mqttClientFactory(),
-                        "hello","hello1");
-        adapter.setCompletionTimeout(completionTimeout);
-        adapter.setConverter(new DefaultPahoMessageConverter ());
-        adapter.setQos(1);
-        adapter.setOutputChannel(mqttInputChannel());
+                new MqttPahoMessageDrivenChannelAdapter (clientId + "_inbound", mqttClientFactory ( ),
+                        "hello", "hello1");
+        adapter.setCompletionTimeout (completionTimeout);
+        adapter.setConverter (new DefaultPahoMessageConverter ( ));
+        adapter.setQos (1);
+        adapter.setOutputChannel (mqttInputChannel ( ));
         return adapter;
     }
 
     /**
      * 通过通道获取数据
+     *
      * @return
      */
     @Bean
     @ServiceActivator(inputChannel = "mqttInputChannel")
     public MessageHandler handler() {
-        return new MessageHandler() {
+        return new MessageHandler ( ) {
             @Override
             public void handleMessage(Message<?> message) throws MessagingException {
-                String topic = message.getHeaders().get("mqtt_receivedTopic").toString();
+                String topic = message.getHeaders ( ).get ("mqtt_receivedTopic").toString ( );
 //                String type = topic.substring(topic.lastIndexOf("/")+1, topic.length());
-                if("hello".equalsIgnoreCase(topic)){
-                    System.out.println("hello,fuckXX,"+message.getPayload().toString());
+                if ( "hello".equalsIgnoreCase (topic) ) {
+                    System.out.println ("hello,fuckXX," + message.getPayload ( ).toString ( ));
 //                    JSONObject jsonObject = JSONUtil.parseObj (message.getPayload().toString());
 //                    Object name = jsonObject.get ("name");
 //                    System.out.println (name );
-                }else if("hello1".equalsIgnoreCase(topic)){
-                    System.out.println("hello1,fuckXX,"+message.getPayload().toString());
+                    logger.info ("mqtt:" + message.getPayload ( ).toString ( ));
+                    try {
+                        WebSocketServer.sendInfo (message.getPayload ( ).toString ( ), null);
+                    } catch (IOException e) {
+                        e.printStackTrace ( );
+                    }
+                } else if ( "hello1".equalsIgnoreCase (topic) ) {
+                    System.out.println ("hello1,fuckXX," + message.getPayload ( ).toString ( ));
                 }
             }
         };

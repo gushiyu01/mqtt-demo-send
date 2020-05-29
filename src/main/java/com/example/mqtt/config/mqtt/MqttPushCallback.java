@@ -1,4 +1,4 @@
-package com.example.mqtt.mqttdemosend.config;
+package com.example.mqtt.config.mqtt;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;

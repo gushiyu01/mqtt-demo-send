@@ -1,4 +1,4 @@
-package com.example.mqtt.mqttdemosend;
+package com.example.mqtt;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;

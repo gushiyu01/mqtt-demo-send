@@ -1,4 +1,4 @@
-package com.example.mqtt.mqttdemosend.service;
+package com.example.mqtt.service;
 
 
 import org.springframework.integration.annotation.MessagingGateway;

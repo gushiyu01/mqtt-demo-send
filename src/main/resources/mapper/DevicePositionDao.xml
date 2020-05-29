@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mqtt.dao.DevicePositionDao">
+
+    <resultMap type="com.example.mqtt.entity.DevicePosition" id="DevicePositionMap">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="deviceId" column="device_id" jdbcType="VARCHAR"/>
+        <result property="lng" column="lng" jdbcType="NUMERIC"/>
+        <result property="lat" column="lat" jdbcType="NUMERIC"/>
+        <result property="recordTime" column="record_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="DevicePositionMap">
+        select
+          id, device_id, lng, lat, record_time
+        from mqtt.device_position
+        where id = #{id}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="DevicePositionMap">
+        select
+          id, device_id, lng, lat, record_time
+        from mqtt.device_position
+        limit #{offset}, #{limit}
+    </select>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryAll" resultMap="DevicePositionMap">
+        select
+          id, device_id, lng, lat, record_time
+        from mqtt.device_position
+        <where>
+            <if test="id != null">
+                and id = #{id}
+            </if>
+            <if test="deviceId != null and deviceId != ''">
+                and device_id = #{deviceId}
+            </if>
+            <if test="lng != null">
+                and lng = #{lng}
+            </if>
+            <if test="lat != null">
+                and lat = #{lat}
+            </if>
+            <if test="recordTime != null">
+                and record_time = #{recordTime}
+            </if>
+        </where>
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="id" useGeneratedKeys="true">
+        insert into mqtt.device_position(device_id, lng, lat, record_time)
+        values (#{deviceId}, #{lng}, #{lat}, #{recordTime})
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update mqtt.device_position
+        <set>
+            <if test="deviceId != null and deviceId != ''">
+                device_id = #{deviceId},
+            </if>
+            <if test="lng != null">
+                lng = #{lng},
+            </if>
+            <if test="lat != null">
+                lat = #{lat},
+            </if>
+            <if test="recordTime != null">
+                record_time = #{recordTime},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from mqtt.device_position where id = #{id}
+    </delete>
+
+</mapper>

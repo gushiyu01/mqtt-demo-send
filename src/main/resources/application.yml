@@ -1,0 +1,50 @@
+server:
+  port: 8081
+
+spring:
+  mqtt:
+    username: admin
+    password: admin
+    url: tcp://47.104.168.202:1883
+    client:
+      id: mqttId
+    default:
+      topic: topic
+    completionTimeout: 3000
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://10.10.10.57:3306/mqtt?serverTimezone=Asia/Shanghai&useUnicode=true&character_set_server=utf8mb4&useSSL=false
+    username: root
+    password: root
+    type: com.alibaba.druid.pool.DruidDataSource
+    #    schema:
+    #      - classpath:sql/department.sql
+    #      - classpath:sql/employee.sql
+    #   数据源其他配置
+    initialSize: 5
+    minIdle: 5
+    maxActive: 20
+    maxWait: 60000
+    timeBetweenEvictionRunsMillis: 60000
+    minEvictableIdleTimeMillis: 300000
+    validationQuery: SELECT 1 FROM DUAL
+    testWhileIdle: true
+    testOnBorrow: false
+    testOnReturn: false
+    poolPreparedStatements: true
+    #   配置监控统计拦截的filters，去掉后监控界面sql无法统计，'wall'用于防火墙
+    filters: stat,wall
+    maxPoolPreparedStatementPerConnectionSize: 20
+    useGlobalDataSourceStat: true
+    connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=500
+
+thymeleaf:
+  cache: false
+  prefix: classpath:/templates/
+  suffix: .html
+  mode: HTML5
+  encoding: UTF-8
+  context-type: text/html
+
+mybatis:
+  mapper-locations: classpath:mapper/**/*.xml,mapper/*.xml

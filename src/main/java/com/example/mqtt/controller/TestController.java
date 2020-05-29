@@ -1,7 +1,7 @@
-package com.example.mqtt.mqttdemosend.controller;
+package com.example.mqtt.controller;
 
 
-import com.example.mqtt.mqttdemosend.service.MqttGateway;
+import com.example.mqtt.service.MqttGateway;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
